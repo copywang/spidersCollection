@@ -96,4 +96,25 @@
 4. 异常处理
 
 
+## 04 爬取妹子图最热图片
+参考链接：https://github.com/wzyonggege/Mzitu-Crawler/blob/master/mzitu.py
+
+### 实验功能
+爬取http://www.mzitu.com/hot/的文章图片
+1. 先请求http://www.mzitu.com/hot/首页
+2. 分析首页HTML代码，用正则表达式获取一共有多少后翻页数，后续的url格式是http://www.mzitu.com/hot/页码
+3. 在"http://www.mzitu.com/hot/页码"中查找图片页的地址，使用正则表达式
+4. 把图片详情页的url作为参数，传入main函数，首先请求图片详情页，使用正则表达式查找是有多少张图片，使用图片详情页的url和图片的索引，可以组合出图片页的真实url，使用正则表达式获取图片标题和图片真实的url
+5. 下载图片，并保存到MongoDB
+
+
+### 遇到的问题
+1. 请求图片详情页出错，返回“盗链”的图片提示，修改header并传入正确的Referer解决
+2. 图片标题带？，使用replace方法替换，否则无法创建目录
+
+### 需要改进的地方
+1. 多线程，当前是单线程采集，速度很慢
+
+
+
 
