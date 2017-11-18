@@ -11,7 +11,12 @@ from pyquery import PyQuery as pq
 import pymongo
 from config import *
 
+# SERVICE_ARGS = ['--load-images=false', '--disk-cache=true']
+# browser = webdriver.PhantomJS(service_args=SERVICE_ARGS)
+# browser.set_window_size(1400,900)
+
 browser = webdriver.Firefox()
+
 client = pymongo.MongoClient(MONGO_URL)#连接MONGODB
 db = client[MONGO_DB]
 
@@ -77,7 +82,7 @@ def get_products(page_num):
     index = 0
     for item in items:
         product = {
-            'image': item.find('.pic .img').attr('src'),
+            'image': item.find('.pic .img').attr('data-src'),
             'price': item.find('.price').text(),
             'deal': item.find('.deal-cnt').text()[:-3],
             'title': item.find('.title').text(),
@@ -107,4 +112,8 @@ def main(key_word):
         browser.close()
 
 if __name__ == '__main__':
+    start = time.clock()
     main(key_word)
+    end = time.clock()
+    print('运行时间： ',end-start)
+
