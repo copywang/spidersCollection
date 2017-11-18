@@ -54,12 +54,6 @@ def get_more_page(page_num):
     print('结果一共 ',len(temp_list),' 图片页')
     return temp_list
 
-def download_img(image_url,title,count):
-    pass
-
-def save_image_local(content,url,title,count):
-    pass
-
 def save_to_mongo(title,url,count,image_url):
     if db[MONGO_TABLE].insert({'title':title,'url':url,'count':count,'image_url':image_url}):
         print('【',title,'】','第 ',count,' 张图存储到MongoDB成功')
@@ -78,7 +72,6 @@ def main(detail_url):
         result = re.search(pattern, str(page_num))
         # 找出详情页一共有多少张图片
         int_result = int(result.group(1))
-
         for count in range(1,int_result+1):
             url_new = '{}/{}'.format(detail_url, count)
             response = requests.get(url_new)
@@ -88,6 +81,7 @@ def main(detail_url):
             img = re.search(pattern,result)
             image_url = img.group(1)
             title = img.group(2)
+            title = title.replace('?','_')
             dirName = u"jpg/【{}P】{}".format(int_result, title)
             save_path = '{0}/{1}'.format(os.getcwd(), dirName)
             if not os.path.exists(save_path):
@@ -104,38 +98,42 @@ def main(detail_url):
                 'Referer': '{}'.format(image_url),
             }
             save_to_mongo(title, url_new,count,image_url)
-
             try:
                 print('正在下载图片：', image_url)
                 img_response = requests.get(image_url, headers=header)
-
                 file_path = '{0}/{1}/{2}.{3}'.format(os.getcwd(), dirName, count, 'jpg')
                 if img_response.status_code == 200:
                     with open(file_path, 'wb') as f:
-                        if f.write(img_response.content):
-                            print('下载图片 :', image_url, '成功')
-                            f.close()
-                        else:
-                            img_response = requests.get(image_url, headers=header)
+                        f.write(img_response.content)
+                        print('下载图片 :', image_url, '成功')
+                        f.close()
                 else:
-                    img_response = requests.get(image_url, headers=header)
+                    print('图片请求出错', image_url)
+                    return None
             except RequestException:
-                print('图片请求出错', url)
+                print('图片请求出错', image_url)
                 return None
     except RequestException:
         print('请求图片页 ',detail_url,'失败')
 
 if __name__ == '__main__':
+    start = time.clock()
     # 获取第一页
     first_html = get_first_page(url)
     # 解析第一页，获取总页数
     total_page_num = parse_first_page(first_html)
     # 获取所有页
     int_total_page_num = int(total_page_num)
-    detail_url_list = get_more_page(int_total_page_num)
+    print('一共有 ',int_total_page_num,'页数据')
+    expect_page_num = input('请输入页码：')
+    # detail_url_list = get_more_page(int_total_page_num)
+    detail_url_list = get_more_page(int(expect_page_num))
     for detail_url in detail_url_list:
         main(detail_url)
         time.sleep(2)
+    end = time.clock()
+    print('运行时间：',end-start)
+
 
 
 
